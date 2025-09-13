@@ -1,9 +1,12 @@
 package db
 
-import ("gorm.io/gorm"
-		"log"
-		"gorm.io/driver/postgres")
+import (
+	"log"
 
+	logs "github.com/SergoHop/log-analyzer/internal/logs"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
 
 //чисто соединение с бд(также мы использовали AutoMigrate для миграции с наших моделей(спасибо gorm!!!))
 func Init() *gorm.DB {
@@ -15,7 +18,7 @@ func Init() *gorm.DB {
 		log.Fatalln(err)
 
 	}
-	//db.AutoMigrate(&models.Log{}, &models.Anomaly{})
+	db.AutoMigrate(&logs.Log{})
 	return db
 }
  
