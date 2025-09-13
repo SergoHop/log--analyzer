@@ -6,19 +6,24 @@ import (
 	"net/http"
 
 	"github.com/SergoHop/log-analyzer/internal/database"
+	"github.com/SergoHop/log-analyzer/internal/log"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	DB := db.Init()
-	fmt.Println("бд норм", DB != nil)
-	log.Println("бд конект")
+	
+	repo := logs.NewRepository(DB)
+	
+	handler := logs.NewLoggerhandler(repo)
 
 	r := gin.Default()
-	
+    r.POST("/logs", handler.CreateLogs)
+    r.GET("/logs", handler.GetLogs)
+    r.GET("/logs/:id", handler.GetLog)
+    r.DELETE("/logs/:id", handler.DeleteLog)
 
-	r.GET("/health", func(c *gin.Context) {
-		c.String(http.StatusOK, "все норм")
-	})
+	
+	r.GET("/Log", )
 	r.Run(":8080")
 }
