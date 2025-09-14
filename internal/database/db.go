@@ -3,6 +3,7 @@ package db
 import (
 	"log"
 
+	"github.com/SergoHop/log-analyzer/internal/anomalies"
 	logs "github.com/SergoHop/log-analyzer/internal/logs"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -18,7 +19,7 @@ func Init() *gorm.DB {
 		log.Fatalln(err)
 
 	}
-	db.AutoMigrate(&logs.Log{})
+	db.AutoMigrate(&logs.Log{}, &anomalies.Anomaly{})
 	return db
 }
  

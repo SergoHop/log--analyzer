@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/SergoHop/log-analyzer/internal/anomalies"
 	"github.com/SergoHop/log-analyzer/internal/database"
 	"github.com/SergoHop/log-analyzer/internal/logs"
 	"github.com/gin-gonic/gin"
@@ -9,9 +10,9 @@ import (
 func main() {
 	DB := db.Init()
 	
-	repo := logs.NewLogRepository(DB)
-	
-	handler := logs.NewLoggerhandler(repo)
+	logrepo := logs.NewLogRepository(DB)
+	anomalyRepo := anomalies.NewAnomalyRepository(DB)
+	handler := logs.NewLoggerhandler(logrepo,anomalyRepo)
 
 	r := gin.Default()
     r.POST("/logs", handler.CreateLogs)

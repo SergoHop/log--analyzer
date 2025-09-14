@@ -4,12 +4,14 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/SergoHop/log-analyzer/internal/anomalies"
 	"github.com/gin-gonic/gin"
 	_ "gorm.io/gorm"
 )
 
 type LoggerHandler struct{
 	Log logger
+	AnomalyRepo *anomalies.AnomalyRepository
 }
 
 type logger interface{
@@ -17,12 +19,14 @@ type logger interface{
 	GetAllLogs() ([]Log, error)
 	GetLogByID(id uint) (*Log, error)
 	DeleteLog(id uint) (error)
+	CountLogsByUserInLastMinute(userID uint) (int64, error)
 }
 
 
-func NewLoggerhandler(s logger) *LoggerHandler{
+func NewLoggerhandler(s logger, l *anomalies.AnomalyRepository) *LoggerHandler{
 	return &LoggerHandler{
 		Log: s,
+		AnomalyRepo: l,
 	}
 }
 
@@ -36,6 +40,23 @@ func (h *LoggerHandler) CreateLogs(c *gin.Context){
 	if err := h.Log.CreateLogs(&newItem); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+	if newItem.EventType == "error"{
+		anomaly := anomalies.Anomaly{
+			LogID:  newItem.ID, 
+              UserID: newItem.UserID,
+              Rule:   "error_event",
+		}
+		h.AnomalyRepo.Create(&anomaly)
+	}
+
+	count, _ := h.Log.CountLogsByUserInLastMinute(newItem.UserID)
+	if count > 5 {
+    	h.AnomalyRepo.Create(&anomalies.Anomaly{
+        	LogID: newItem.ID,
+        	UserID: newItem.UserID,
+        	Rule: "too_many_logs",
+    	})
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "создано"})
 }

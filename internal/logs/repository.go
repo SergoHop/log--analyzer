@@ -1,6 +1,10 @@
 package logs
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type LogRepository struct{
 	Db *gorm.DB
@@ -30,4 +34,10 @@ func (r *LogRepository) CreateLogs(log *Log) error{
 func (r *LogRepository) DeleteLog(id uint) error{
 	result := r.Db.Where("id = ?", id).Delete(&Log{})
 	return result.Error
+}
+
+func (r *LogRepository) CountLogsByUserInLastMinute(userID uint) (int64, error){
+	var count int64
+	r.Db.Model(&Log{}).Where("user_id = ? AND created_at >= ?", userID, time.Now().Add(-1*time.Minute)).Count(&count)
+	return count, nil
 }
