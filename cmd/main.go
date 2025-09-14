@@ -1,19 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-
 	"github.com/SergoHop/log-analyzer/internal/database"
-	"github.com/SergoHop/log-analyzer/internal/log"
+	"github.com/SergoHop/log-analyzer/internal/logs"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	DB := db.Init()
 	
-	repo := logs.NewRepository(DB)
+	repo := logs.NewLogRepository(DB)
 	
 	handler := logs.NewLoggerhandler(repo)
 
@@ -22,8 +18,5 @@ func main() {
     r.GET("/logs", handler.GetLogs)
     r.GET("/logs/:id", handler.GetLog)
     r.DELETE("/logs/:id", handler.DeleteLog)
-
-	
-	r.GET("/Log", )
 	r.Run(":8080")
 }
