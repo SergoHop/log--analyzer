@@ -20,6 +20,7 @@ type logger interface{
 	GetLogByID(id uint) (*Log, error)
 	DeleteLog(id uint) (error)
 	CountLogsByUserInLastMinute(userID uint) (int64, error)
+	GetFilteredLogs(userID *uint, eventType string) ([]Log, error)
 }
 
 
@@ -62,12 +63,27 @@ func (h *LoggerHandler) CreateLogs(c *gin.Context){
 }
 
 func (h *LoggerHandler) GetLogs(c *gin.Context){
-	logs, err := h.Log.GetAllLogs()
-	if err != nil{
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, logs)
+	userParam := c.Query("user_id")
+    eventType := c.Query("event_type")
+
+	var userID *uint
+	if userParam != ""{
+		id64, err := strconv.ParseUint(userParam, 10 ,32)
+		if err != nil{
+			c.JSON(http.StatusBadRequest, gin.H{"error": "неправильный юзерайди"})
+			return
+		}
+		parsed := uint(id64)
+        userID = &parsed     
+    }
+
+    logs, err := h.Log.GetFilteredLogs(userID, eventType)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, logs)
 }
 
 func (h *LoggerHandler) GetLog(c *gin.Context){
