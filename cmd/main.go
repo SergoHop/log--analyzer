@@ -25,5 +25,7 @@ func main() {
 	//аномалии
 	r.GET("/anomaly", anomalyHandler.GetAnomalys)
 	r.GET("/anomaly/:id", anomalyHandler.GetAnomalysID)
+	//статистика для аномалий
+	r.GET("/anomaly/stats", anomalyHandler.GetStats)
 	r.Run(":8080")
 }
