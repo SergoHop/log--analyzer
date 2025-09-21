@@ -57,3 +57,10 @@ func (r *LogRepository) GetFilteredLogs(userID *uint, eventType string) ([]Log, 
 	result := q.Find(&logs)
 	return logs, result.Error
 }
+
+
+func (r *LogRepository) GetLogsSince(t time.Time) ([]Log,error){
+	var logs []Log
+	result := r.Db.Where("created_at >= ?", t).Find(&logs)
+	return logs, result.Error
+}
