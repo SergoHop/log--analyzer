@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"os"
 	"os/signal"
 	"syscall"
-	"os"
 
 	"github.com/SergoHop/log-analyzer/internal/anomalies"
+	"github.com/SergoHop/log-analyzer/internal/config"
 	"github.com/SergoHop/log-analyzer/internal/database"
 	"github.com/SergoHop/log-analyzer/internal/logs"
 	"github.com/SergoHop/log-analyzer/internal/worker"
@@ -17,7 +18,8 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	DB := db.Init()
+	cfg := config.Load()
+	DB := db.Init(cfg)
 	
 	logrepo := logs.NewLogRepository(DB)
 	anomalyRepo := anomalies.NewAnomalyRepository(DB)
